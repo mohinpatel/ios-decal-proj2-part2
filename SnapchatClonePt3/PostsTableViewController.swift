@@ -86,22 +86,15 @@ class PostsTableViewController: UIViewController, UITableViewDelegate, UITableVi
                             let image = UIImage(data: data)
                             self.loadedImagesById[onePost.postId] = image
                         }
-//                        if data == nil {
-//                        print(data)
-//                    } else {
-//                        let image = UIImage(data: data!)
-//                        self.loadedImagesById[onePost.postId] = image
-//                      }
-                            
                     })
-                
+                    self.postTableView.reloadData()
                 }
             
             }
         })
         
         print("done")
-        postTableView.reloadData()
+        
 
     }
     

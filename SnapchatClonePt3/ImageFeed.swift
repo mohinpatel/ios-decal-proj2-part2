@@ -126,12 +126,12 @@ func getPosts(user: CurrentUser, completion: @escaping ([Post]?) -> Void) {
                 read = true
                 }
             }
-            let valueT = value as? [String: String]
-            let username = valueT?[firUsernameNode] ?? ""
-            let postImagePath = valueT?[firImagePathNode] ?? ""
-            let thread = valueT?[firThreadNode] ?? ""
-            let dateString = valueT?[firDateNode] ?? "\u{14}\0\0"
-            let post = Post(id: key, username: username , postImagePath: postImagePath, thread: thread, dateString: dateString, read: read)
+            let temp = value as? [String: String]
+            let username = temp?[firUsernameNode]
+            let postImagePath = temp?[firImagePathNode]
+            let thread = temp?[firThreadNode]
+            let dateString = temp?[firDateNode]
+            let post = Post(id: key, username: username! , postImagePath: postImagePath!, thread: thread!, dateString: dateString!, read: read)
             postArray.append(post)
         }
         completion(postArray)
