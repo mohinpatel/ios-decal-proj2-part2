@@ -40,6 +40,28 @@ class SignupViewController: UIViewController, UITextFieldDelegate {
         guard let name = nameField.text else { return }
         
         // YOUR CODE HERE
+        if password.characters.count < 6 {
+            let alert = UIAlertController(title: "Invalid Password", message: "Password length must be at least 6 characters", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+        }
+        FIRAuth.auth()?.createUser(withEmail: email, password: password, completion: {
+            (user, error) in
+            if error != nil {
+                print(error!)
+                return
+            }
+        })
+        let changeUserName = FIRAuth.auth()?.currentUser?.profileChangeRequest()
+        changeUserName?.displayName = name
+        changeUserName?.commitChanges(completion: {
+            error in
+            if error != nil {
+                print(error!)
+                return
+            }
+        })
+        
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

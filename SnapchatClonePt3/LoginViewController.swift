@@ -43,6 +43,16 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         guard let passwordText = passwordField.text else { return }
         
         // YOUR CODE HERE
+        FIRAuth.auth()?.signIn(withEmail: emailText, password: passwordText, completion: {
+        (user, error) in
+            if error != nil {
+                let alert =  UIAlertController(title: "Sign in failed", message: "try again", preferredStyle: .alert)
+                let closeAction = UIAlertAction(title: "Close", style: .cancel, handler: nil)
+                alert.addAction(closeAction)
+                self.present(alert, animated: true, completion:  nil)
+            }
+            self.performSegue(withIdentifier: "loginToMain", sender: nil)
+        })
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

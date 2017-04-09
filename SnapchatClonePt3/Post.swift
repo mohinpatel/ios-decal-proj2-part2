@@ -35,7 +35,7 @@ class Post {
         self.thread = thread
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = dateFormat
-        self.date = dateFormatter.date(from: dateString)!
+        self.date = dateFormatter.date(from: dateString) ?? Date()
         self.read = read
         self.postId = id
     }

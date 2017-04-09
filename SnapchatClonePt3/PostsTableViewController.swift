@@ -51,7 +51,9 @@ class PostsTableViewController: UIViewController, UITableViewDelegate, UITableVi
         (Hint): This should be pretty simple.
     */
     override func viewWillAppear(_ animated: Bool) {
-        // YOUR CODE HERE
+        super.viewWillAppear(animated)
+        updateData()
+        print("done")
     }
 
     override func didReceiveMemoryWarning() {
@@ -72,6 +74,35 @@ class PostsTableViewController: UIViewController, UITableViewDelegate, UITableVi
     */
     func updateData() {
         // YOUR CODE HERE
+        getPosts(user: currentUser, completion: {
+            post in
+            clearThreads()
+            if let post = post {
+                for onePost in post {
+                    addPostToThread(post: onePost)
+                    getDataFromPath(path: onePost.postImagePath, completion: {
+                        data in
+                        if let data = data {
+                            let image = UIImage(data: data)
+                            self.loadedImagesById[onePost.postId] = image
+                        }
+//                        if data == nil {
+//                        print(data)
+//                    } else {
+//                        let image = UIImage(data: data!)
+//                        self.loadedImagesById[onePost.postId] = image
+//                      }
+                            
+                    })
+                
+                }
+            
+            }
+        })
+        
+        print("done")
+        postTableView.reloadData()
+
     }
     
     // MARK: Custom methods (relating to UI)
@@ -145,7 +176,13 @@ class PostsTableViewController: UIViewController, UITableViewDelegate, UITableVi
             post.read = true
             
             // YOUR CODE HERE
-            
+            let ref = FIRDatabase.database().reference()
+            if currentUser.readPostIDs == nil {
+                currentUser.readPostIDs = [post.postId]
+            } else {
+                currentUser.readPostIDs?.append(post.postId)
+            }
+        ref.child(firUsersNode).child(currentUser.id).child(firReadPostsNode).childByAutoId().setValue(post.postId)
             tableView.reloadRows(at: [indexPath], with: .automatic)
         }
      

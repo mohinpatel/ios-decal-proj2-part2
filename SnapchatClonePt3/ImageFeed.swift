@@ -61,6 +61,11 @@ func addPost(postImage: UIImage, thread: String, username: String) {
     let path = "\(firStorageImagesPath)/\(UUID().uuidString)"
     
     // YOUR CODE HERE
+    let currentDate = DateFormatter()
+    currentDate.dateFormat = dateFormat
+    let snapDict: [String: String] = [firImagePathNode: path, firThreadNode : thread, firUsernameNode: username, firDateNode: currentDate.string(from: Date())]
+    dbRef.child(firPostsNode).childByAutoId().setValue(snapDict)
+    store(data: data, toPath: path)
 }
 
 /*
@@ -73,8 +78,15 @@ func addPost(postImage: UIImage, thread: String, username: String) {
 */
 func store(data: Data, toPath path: String) {
     let storageRef = FIRStorage.storage().reference()
-    
-    // YOUR CODE HERE
+    let imageRef = storageRef.child(path)
+    imageRef.put(data, metadata: nil){
+        (metadata, error) in
+        if metadata != nil {
+            print("storage error")
+            return
+        }
+    }
+ 
 }
 
 
@@ -98,13 +110,43 @@ func store(data: Data, toPath path: String) {
 func getPosts(user: CurrentUser, completion: @escaping ([Post]?) -> Void) {
     let dbRef = FIRDatabase.database().reference()
     var postArray: [Post] = []
-    
     // YOUR CODE HERE
+    dbRef.child(firPostsNode).observeSingleEvent(of: .value, with: {
+        snapshot in
+        if !snapshot.exists() || snapshot.value == nil {
+            completion(nil)
+            return
+        }
+        let snapDictionary = snapshot.value as? [String: AnyObject]
+        let readPosts = user.readPostIDs
+        for (key, value) in snapDictionary!{
+            var read = false
+            if readPosts != nil {
+                if readPosts!.contains(key) {
+                read = true
+                }
+            }
+            let valueT = value as? [String: String]
+            let username = valueT?[firUsernameNode] ?? ""
+            let postImagePath = valueT?[firImagePathNode] ?? ""
+            let thread = valueT?[firThreadNode] ?? ""
+            let dateString = valueT?[firDateNode] ?? "\u{14}\0\0"
+            let post = Post(id: key, username: username , postImagePath: postImagePath, thread: thread, dateString: dateString, read: read)
+            postArray.append(post)
+        }
+        completion(postArray)
+    }){ (error) in
+        print(error.localizedDescription)
+    }
+    
+
+    
 }
 
 func getDataFromPath(path: String, completion: @escaping (Data?) -> Void) {
     let storageRef = FIRStorage.storage().reference()
-    storageRef.child(path).data(withMaxSize: 5 * 1024 * 1024) { (data, error) in
+    storageRef.child(path).data(withMaxSize: 5 * 1024 * 1024) {
+        data, error in
         if let error = error {
             print(error)
         }
